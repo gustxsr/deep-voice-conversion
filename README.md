@@ -1,19 +1,12 @@
 # Voice Conversion with Non-Parallel Data
-## Subtitle: Speaking like Kate Winslet
+## Subtitle: Speaking like Youtube gathered data
 > Authors: Dabi Ahn(andabi412@gmail.com), [Kyubyong Park](https://github.com/Kyubyong)(kbpark.linguist@gmail.com)
 
 ## Samples
 https://soundcloud.com/andabi/sets/voice-style-transfer-to-kate-winslet-with-deep-neural-networks
 
-## Intro
-What if you could imitate a famous celebrity's voice or sing like a famous singer?
-This project started with a goal to convert someone's voice to a specific target voice.
-So called, it's voice style transfer.
-We worked on this project that aims to convert someone's voice to a famous English actress [Kate Winslet](https://en.wikipedia.org/wiki/Kate_Winslet)'s 
-[voice](https://soundcloud.com/andabi/sets/voice-style-transfer-to-kate-winslet-with-deep-neural-networks).
-We implemented a deep neural networks to achieve that and more than 2 hours of audio book sentences read by Kate Winslet are used as a dataset.
-
-<p align="center"><img src="https://raw.githubusercontent.com/andabi/deep-voice-conversion/master/materials/title.png" width="50%"></p>
+## Trying this model on my own dataset
+Using python 3.6, Cuda 10.1. List the verisons of packages that I am using. Note that I changed one of the files of tensorpack to make it work (model_desc.py. Using GPU. Ran into so many bugs,  but in the end got it runninng with my own youtube dataset. I am using tensorflow==1.15 and tensorpack==0.9.0.1. 
 
 ## Model Architecture
 This is a many-to-one voice conversion system.

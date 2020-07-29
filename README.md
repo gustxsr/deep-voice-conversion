@@ -6,7 +6,7 @@
 https://soundcloud.com/andabi/sets/voice-style-transfer-to-kate-winslet-with-deep-neural-networks
 
 ## Trying this model on my own dataset
-Using python 3.6, Cuda 10.1. List the verisons of packages that I am using. Note that I changed one of the files of tensorpack to make it work (model_desc.py. Using GPU. Ran into so many bugs,  but in the end got it runninng with my own youtube dataset. I am using tensorflow==1.15 and tensorpack==0.9.0.1. 
+Using python 3.6, Cuda 10.1. List the verisons of packages that I am using. Note that I changed one of the files of tensorpack to make it work (model_desc.py. Using GPU. Ran into so many bugs,  but in the end got it runninng with my own youtube dataset. I am using tensorflow==1.15 and tensorpack==0.9.0.1. librosa==0.6.2. Moved to gooogle drive because there is an issue with cudnn.
 
 ## Model Architecture
 This is a many-to-one voice conversion system.

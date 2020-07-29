@@ -1,86 +1,40 @@
 # Voice Conversion with Non-Parallel Data
-## Subtitle: Speaking like Youtube gathered data
-> Authors: Dabi Ahn(andabi412@gmail.com), [Kyubyong Park](https://github.com/Kyubyong)(kbpark.linguist@gmail.com)
+## Using your own dataset
 
-## Samples
-https://soundcloud.com/andabi/sets/voice-style-transfer-to-kate-winslet-with-deep-neural-networks
 
-## Trying this model on my own dataset
-Using python 3.6, Cuda 10.1. List the verisons of packages that I am using. Note that I changed one of the files of tensorpack to make it work (model_desc.py. Using GPU. Ran into so many bugs,  but in the end got it runninng with my own youtube dataset. I am using tensorflow==1.15 and tensorpack==0.9.0.1. librosa==0.6.2. Moved to gooogle drive because there is an issue with cudnn.
+## How to make it work:
+First, I set up a docker container with this docker container `run -dit -v /mas:/mas -v /u:/u -v /dtmp:/dtmp -v /tmp:/tmp --name $(whoami)-deep-voice-changer tensorflow/tensorflow:latest-gpu`. I did everything specified by Necsys plus these aditional steps:
 
-## Model Architecture
-This is a many-to-one voice conversion system.
-The main significance of this work is that we could generate a target speaker's utterances without parallel data like <source's wav, target's wav>, <wav, text> or <wav, phone>, but only waveforms of the target speaker.
-(To make these parallel datasets needs a lot of effort.)
-All we need in this project is a number of waveforms of the target speaker's utterances and only a small set of <wav, phone> pairs from a number of anonymous speakers.
+1. apt-get install libsndfile1
+2. apt-get install ffmpeg libavcodec-extra
+3. apt-get install build-essential libcap-dev
+4. apt-get install nano
+5. apt-get install screen
+6. apt-get install virtualenv (or python-virtualenv)
+7. apt-get install git
 
-<p align="center"><img src="https://raw.githubusercontent.com/andabi/deep-voice-conversion/master/materials/architecture.png" width="85%"></p>
+After that, I sudo'd and cloned the repository by andabi in /u/$(whoami). Then, make an environment and pip install following packages: 
 
-The model architecture consists of two modules:
-1. Net1(phoneme classification) classify someone's utterances to one of phoneme classes at every timestep.
-    * Phonemes are speaker-independent while waveforms are speaker-dependent.
-2. Net2(speech synthesis) synthesize speeches of the target speaker from the phones.
+* librosa == 0.6.2 (make sure that numba == 0.48 and llvmlite==0.33.0)
+* tensorflow-gpu==1.15 (makse sure you pip uninstall tensorflow before, seems to help)
+* tensorpack==0.9.0.1
+* pydub
+* soundfile
+* git+https://github.com/wookayin/tensorflow-plot.git@master
+* joblib
+* pyyaml
+* python-prctl
+* gdown
 
-We applied CBHG(1-D convolution bank + highway network + bidirectional GRU) modules that are mentioned in [Tacotron](https://arxiv.org/abs/1703.10135).
-CBHG is known to be good for capturing features from sequential data.
+Once you have these packages, you have to modify two lines in the tensorpack file. Do `nano $(nameOfEnv)/lib/python3.6/site-packages/tensorpack/graph_builder/utils.py` and change "from tensorflow.contrib import nccl" to "from tensorflow.python.ops.nccl_ops import all_sum" and change "summed = nccl.all_sum(grads)" to "summed = all_sum(grads)". These lines are in the function allreduce_grads. 
 
-### Net1 is a classifier.
-* Process: wav -> spectrogram -> mfccs -> phoneme dist.
-* Net1 classifies spectrogram to phonemes that consists of 60 English phonemes at every timestep.
-  * For each timestep, the input is log magnitude spectrogram and the target is phoneme dist.
-* Objective function is cross entropy loss.
-* [TIMIT dataset](https://catalog.ldc.upenn.edu/LDC93S1) used.
-  * contains 630 speakers' utterances and corresponding phones that speaks similar sentences.
-* Over 70% test accuracy
+Finished that? Good, almost there! Now do `nano hparams/default.yaml` and change "logdir_path: '/u/$(WHOAMI)/deep-voice-conversion/training'" (remember to make the folder 'training'). Then, in the same thing change `data_path: '/u/$(WHOAMI)/deep-voice-conversion/datasets/arctic/slt/*.wav'`, which should be under train2. 
 
-### Net2 is a synthesizer.
-Net2 contains Net1 as a sub-network.
-* Process: net1(wav -> spectrogram -> mfccs -> phoneme dist.) -> spectrogram -> wav
-* Net2 synthesizes the target speaker's speeches.
-  * The input/target is a set of target speaker's utterances.
-* Since Net1 is already trained in previous step, the remaining part only should be trained in this step.
-* Loss is reconstruction error between input and target. (L2 distance)
-* Datasets
-    * Target1(anonymous female): [Arctic](http://www.festvox.org/cmu_arctic/) dataset (public)
-    * Target2(Kate Winslet): over 2 hours of audio book sentences read by her (private)
-* Griffin-Lim reconstruction when reverting wav from spectrogram.
+One last thing is missing, you have to install the pretrained model for train1. Run the following commands:
 
-## Implementations
-### Requirements
-* python 2.7
-* tensorflow >= 1.1
-* numpy >= 1.11.1
-* librosa == 0.5.1
-
-### Settings
-* sample rate: 16,000Hz
-* window length: 25ms
-* hop length: 5ms
-
-### Procedure
-* Train phase: Net1 and Net2 should be trained sequentially.
-  * Train1(training Net1)
-    * Run `train1.py` to train and `eval1.py` to test.
-  * Train2(training Net2)
-    * Run `train2.py` to train and `eval2.py` to test.
-      * Train2 should be trained after Train1 is done!
-* Convert phase: feed forward to Net2
-    * Run `convert.py` to get result samples.
-    * Check Tensorboard's audio tab to listen the samples.
-    * Take a look at phoneme dist. visualization on Tensorboard's image tab.
-      * x-axis represents phoneme classes and y-axis represents timesteps
-      * the first class of x-axis means silence.
-
-<p align="center"><img src="https://raw.githubusercontent.com/andabi/deep-voice-conversion/master/materials/phoneme_dist.png" width="30%"></p>
-
-## Tips (Lessons We've learned from this project)
-* Window length and hop length have to be small enough to be able to fit in only a phoneme.
-* Obviously, sample rate, window length and hop length should be same in both Net1 and Net2.
-* Before ISTFT(spectrogram to waveforms), emphasizing on the predicted spectrogram by applying power of 1.0~2.0 is helpful for removing noisy sound.
-* It seems that to apply temperature to softmax in Net1 is not so meaningful.
-* IMHO, the accuracy of Net1(phoneme classification) does not need to be so perfect.
-  * Net2 can reach to near optimal when Net1 accuracy is correct to some extent.
-
-## References
-* ["Phonetic posteriorgrams for many-to-one voice conversion without parallel data training"](https://www.researchgate.net/publication/307434911_Phonetic_posteriorgrams_for_many-to-one_voice_conversion_without_parallel_data_training), 2016 IEEE International Conference on Multimedia and Expo (ICME)
-* ["TACOTRON: TOWARDS END-TO-END SPEECH SYNTHESIS"](https://arxiv.org/abs/1703.10135), Submitted to Interspeech 2017
+* `gdown https://drive.google.com/uc?id=1yC3G3V03X3s8mKJ1J6bMkOqDT8r-TBb8`
+* `python`
+* In the python terminal thing, write:
+`import zipfile
+with zipfile.ZipFile("train1.zip", 'r') as zip_ref:
+    zip_ref.extractall("training")`

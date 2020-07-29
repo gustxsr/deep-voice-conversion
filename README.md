@@ -28,7 +28,7 @@ After that, I sudo'd and cloned the repository by andabi in /u/$(whoami). Then, 
 
 Once you have these packages, you have to modify two lines in the tensorpack file. Do `nano $(nameOfEnv)/lib/python3.6/site-packages/tensorpack/graph_builder/utils.py` and change "from tensorflow.contrib import nccl" to "from tensorflow.python.ops.nccl_ops import all_sum" and change "summed = nccl.all_sum(grads)" to "summed = all_sum(grads)". These lines are in the function allreduce_grads. 
 
-Finished that? Good, almost there! Now do `nano hparams/default.yaml` and change "logdir_path: '/u/$(WHOAMI)/deep-voice-conversion/training'" (remember to make the folder 'training'). Then, in the same thing change `data_path: '/u/$(WHOAMI)/deep-voice-conversion/datasets/arctic/slt/*.wav'`, which should be under train2. 
+Finished that? Good, almost there! Now do `nano hparams/default.yaml` and change `"logdir_path: '/u/$(WHOAMI)/deep-voice-conversion/logdir'"` (remember to make the folder 'logdir' and also make a dir inside it called "1"). Then, in the same thing change `data_path: '/u/$(WHOAMI)/deep-voice-conversion/datasets/arctic/slt/*.wav'`, which should be under train2. 
 
 One last thing is missing, you have to install the pretrained model for train1. Run the following commands:
 
@@ -37,9 +37,11 @@ One last thing is missing, you have to install the pretrained model for train1. 
 * In the python terminal thing, write:
 
 ```
-    import zipfile
-    
-    with zipfile.ZipFile("train1.zip", 'r') as zip_ref:
-    
-        zip_ref.extractall("training")
+import zipfile
+with zipfile.ZipFile("train1.zip", 'r') as zip_ref:
+    zip_ref.extractall("logdir/1")
 ```
+
+Now you should be good to run train2 by doing `python train2.py "1" "2"`!
+
+

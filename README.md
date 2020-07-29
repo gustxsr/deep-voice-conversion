@@ -38,5 +38,7 @@ One last thing is missing, you have to install the pretrained model for train1. 
 
 
 `import zipfile`
+
 `with zipfile.ZipFile("train1.zip", 'r') as zip_ref:`
+
     `zip_ref.extractall("training")`

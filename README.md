@@ -12,10 +12,11 @@ First, I set up a docker container with this docker container `run -dit -v /mas:
 5. apt-get install screen
 6. apt-get install virtualenv (or python-virtualenv)
 7. apt-get install git
+8. apt install libcudnn7 libcudnn7-dev
 
 After that, I sudo'd and cloned the repository by andabi in /u/$(whoami). Then, make an environment and pip install following packages: 
 
-* librosa == 0.6.2 (make sure that numba == 0.48 and llvmlite==0.33.0)
+* librosa == 0.6.2 (make sure that numba == 0.48 and llvmlite==0.32.1)
 * tensorflow-gpu==1.15 (makse sure you pip uninstall tensorflow before, seems to help)
 * tensorpack==0.9.0.1
 * pydub

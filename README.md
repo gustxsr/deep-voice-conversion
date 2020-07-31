@@ -46,3 +46,6 @@ with zipfile.ZipFile("train1.zip", 'r') as zip_ref:
 Now you should be good to run train2 by doing `python train2.py "1" "2"`!
 
 The last bug I ran into was to modify the trailing silences in the audio (because they are already removed in my dataset, not necessary if using the arctic dataset) and also a cuda version incompatibility (Something along these lines: Loaded runtime CuDNN library: 7.1.2 but source was compiled with: 7.3.1. CuDNN library major and minor version needs to match or have higher minor version in case of CuDNN 7.0 or later version. https://github.com/tensorflow/tensorflow/issues/23715)
+
+
+To use convert.py, you have to add the list thingy to the audio and the other thing. Remember to fix this.

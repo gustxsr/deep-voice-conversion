@@ -1,4 +1,4 @@
-e# Voice Conversion with Non-Parallel Data
+# Voice Conversion with Non-Parallel Data
 ## Using your own dataset
 
 
@@ -24,7 +24,6 @@ After that, I sudo'd and cloned the repository by andabi in /u/$(whoami). Then, 
 * git+https://github.com/wookayin/tensorflow-plot.git@master
 * joblib
 * pyyaml
-* python-prctl
 * gdown
 
 Once you have these packages, you have to modify two lines in the tensorpack file. Do `nano $(nameOfEnv)/lib/python3.6/site-packages/tensorpack/graph_builder/utils.py` and change "from tensorflow.contrib import nccl" to "from tensorflow.python.ops.nccl_ops import all_sum" and change "summed = nccl.all_sum(grads)" to "summed = all_sum(grads)". These lines are in the function allreduce_grads. 
